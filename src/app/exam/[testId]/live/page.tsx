@@ -22,6 +22,8 @@ export default function LiveExamPage() {
   const testId = (params.testId as string) || "jee-mock-01";
   const test = MOCK_TESTS_LIST.find((t) => t.id === testId) || MOCK_TESTS_LIST[0];
 
+  const [testTitle, setTestTitle] = React.useState<string>(test.title);
+
   // Total test time: default 180 mins = 10800 secs
   const [timeRemaining, setTimeRemaining] = React.useState<number>(test.duration_minutes * 60);
   const [activeSubject, setActiveSubject] = React.useState<SubjectId>("physics");
@@ -64,6 +66,30 @@ export default function LiveExamPage() {
 
     return allQuestions;
   });
+
+  // Load custom AI test or saved test if testId matches
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const customStr = localStorage.getItem(`jee_custom_test_${testId}`);
+      if (customStr) {
+        try {
+          const parsed = JSON.parse(customStr);
+          if (parsed.title) setTestTitle(parsed.title);
+          if (Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+            setExamQuestions(parsed.questions);
+            if (parsed.questions[0]?.subjectId) {
+              setActiveSubject(parsed.questions[0].subjectId);
+            }
+          }
+          if (parsed.durationMinutes) {
+            setTimeRemaining(parsed.durationMinutes * 60);
+          }
+        } catch (e) {
+          console.error("Error loading custom test:", e);
+        }
+      }
+    }
+  }, [testId]);
 
   // Countdown timer effect
   React.useEffect(() => {
@@ -300,10 +326,10 @@ export default function LiveExamPage() {
     const newAttempt = {
       id: attemptId,
       testId,
-      title: test.title,
+      title: testTitle || test.title,
       date: new Date().toISOString().split("T")[0],
       score: totalScore,
-      maxScore: test.total_marks || 300,
+      maxScore: examQuestions.length * 4 || test.total_marks || 300,
       physicsScore,
       chemistryScore,
       mathScore,
@@ -384,7 +410,7 @@ export default function LiveExamPage() {
     <div className="min-h-screen bg-[#080C14] text-slate-100 flex flex-col justify-between select-none">
       {/* Official Exam Header */}
       <ExamHeader
-        testTitle={test.title}
+        testTitle={testTitle || test.title}
         timeRemainingSeconds={timeRemaining}
         currentNumber={currentQ ? currentQ.orderNumber : 1}
         totalQuestions={examQuestions.length || 90}

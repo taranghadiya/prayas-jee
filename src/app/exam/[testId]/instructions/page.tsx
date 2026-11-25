@@ -22,11 +22,35 @@ export default function TestInstructionsPage() {
   const testId = params.testId as string;
   const test = MOCK_TESTS_LIST.find((t) => t.id === testId) || MOCK_TESTS_LIST[0];
 
+  const [testInfo, setTestInfo] = React.useState({
+    id: testId,
+    title: test.title,
+    duration: test.duration_minutes || 180,
+    totalQuestions: test.total_questions || 75,
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const customStr = localStorage.getItem(`jee_custom_test_${testId}`);
+      if (customStr) {
+        try {
+          const parsed = JSON.parse(customStr);
+          setTestInfo({
+            id: testId,
+            title: parsed.title || test.title,
+            duration: parsed.durationMinutes || 60,
+            totalQuestions: parsed.totalQuestions || parsed.questions?.length || 10,
+          });
+        } catch {}
+      }
+    }
+  }, [testId, test]);
+
   const [acknowledged, setAcknowledged] = React.useState(false);
 
   const handleStartExam = () => {
     if (!acknowledged) return;
-    router.push(`/exam/${test.id}/live`);
+    router.push(`/exam/${testInfo.id}/live`);
   };
 
   return (
@@ -53,7 +77,7 @@ export default function TestInstructionsPage() {
               National Testing Agency CBT Format
             </div>
             <h1 className="text-2xl sm:text-3xl font-serif text-white tracking-tight">
-              General Instructions: {test.title}
+              General Instructions: {testInfo.title}
             </h1>
             <p className="text-xs sm:text-sm text-[#948FA8] mt-1">
               Please read the instructions carefully before commencing the examination.
@@ -64,15 +88,15 @@ export default function TestInstructionsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div className="p-3.5 rounded-xl bg-[#17142F] border border-purple-900/30">
               <span className="text-[#948FA8] uppercase block text-[10px]">Total Duration</span>
-              <span className="font-bold text-white text-sm font-mono">180 Minutes (3 Hrs)</span>
+              <span className="font-bold text-white text-sm font-mono">{testInfo.duration} Minutes</span>
             </div>
             <div className="p-3.5 rounded-xl bg-[#17142F] border border-purple-900/30">
               <span className="text-[#948FA8] uppercase block text-[10px]">Total Marks</span>
-              <span className="font-bold text-purple-300 text-sm font-mono">300 Marks</span>
+              <span className="font-bold text-purple-300 text-sm font-mono">{testInfo.totalQuestions * 4} Marks</span>
             </div>
             <div className="p-3.5 rounded-xl bg-[#17142F] border border-purple-900/30">
               <span className="text-[#948FA8] uppercase block text-[10px]">Total Questions</span>
-              <span className="font-bold text-white text-sm font-mono">75 Questions</span>
+              <span className="font-bold text-white text-sm font-mono">{testInfo.totalQuestions} Questions</span>
             </div>
             <div className="p-3.5 rounded-xl bg-[#17142F] border border-purple-900/30">
               <span className="text-[#948FA8] uppercase block text-[10px]">Marking Scheme</span>

@@ -11,6 +11,7 @@ import {
   TrendingUp,
   CheckCircle2,
   Crown,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -80,13 +81,21 @@ export default function DashboardPage() {
               <Calendar className="h-3.5 w-3.5 text-purple-400" />
               <span>28 Nov 2026 • 10:00 AM</span>
             </div>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-2.5">
               <Link href="/exam/jee-mock-01/instructions">
                 <Button
                   variant="whitePill"
                   className="px-6 py-2.5 h-10 text-xs font-bold gap-2 text-[#080711] hover:bg-slate-100 shadow-md"
                 >
                   Start Test <ArrowRight className="h-3.5 w-3.5 text-[#080711]" />
+                </Button>
+              </Link>
+              <Link href="/ai-test-studio">
+                <Button
+                  variant="purplePill"
+                  className="px-4 py-2.5 h-10 text-xs font-bold gap-1.5"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> ✦ AI Test Studio
                 </Button>
               </Link>
             </div>

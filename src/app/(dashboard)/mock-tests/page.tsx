@@ -8,6 +8,7 @@ import {
   Clock,
   Calendar,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -63,13 +64,21 @@ export default function MockTestsPage() {
   return (
     <div className="space-y-8 animate-in fade-in-50 duration-200">
       {/* Page Header */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-serif text-white tracking-tight">
-          Mock Tests
-        </h1>
-        <p className="text-sm text-[#948FA8]">
-          Take tests that match the real JEE exam.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-serif text-white tracking-tight">
+            Mock Tests
+          </h1>
+          <p className="text-sm text-[#948FA8]">
+            Take tests that match the real JEE exam.
+          </p>
+        </div>
+        <Link href="/ai-test-studio">
+          <Button variant="purplePill" className="text-xs font-bold gap-2 shadow-lg shadow-purple-950/50">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>✦ AI Test Studio</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Filter Tabs matching Screen 5 in the reference image */}

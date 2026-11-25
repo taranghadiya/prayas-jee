@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Mock Tests", href: "/mock-tests", icon: FileText },
+  { name: "AI Test Studio", href: "/ai-test-studio", icon: Sparkles, badge: "✦ AI" },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Leaderboard", href: "/dashboard", icon: Trophy },
   { name: "Study Plan", href: "/chapter-practice", icon: CalendarDays },
@@ -88,6 +89,11 @@ export function Sidebar({
                     )}
                   />
                   <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
