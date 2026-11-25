@@ -41,21 +41,45 @@ export default function SettingsPage() {
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const activeUserStr = localStorage.getItem("jee_active_user");
-      if (activeUserStr) {
-        try {
-          const user = JSON.parse(activeUserStr);
-          if (user.full_name) {
-            setProfile((prev) => ({ ...prev, full_name: user.full_name, email: user.email }));
-          }
-        } catch {}
+      const activeUser = localStorage.getItem("jee_active_user") || "";
+      let foundProfile: any = null;
+
+      // 1. Try account-scoped profile: jee_profile_${email}
+      if (activeUser) {
+        const scopedProfileStr = localStorage.getItem(`jee_profile_${activeUser}`);
+        if (scopedProfileStr) {
+          try {
+            foundProfile = JSON.parse(scopedProfileStr);
+          } catch {}
+        }
       }
 
-      const storedProfile = localStorage.getItem("jee_user_profile");
-      if (storedProfile) {
-        try {
-          setProfile((prev) => ({ ...prev, ...JSON.parse(storedProfile) }));
-        } catch {}
+      // 2. Try global jee_user_profile
+      if (!foundProfile) {
+        const storedProfile = localStorage.getItem("jee_user_profile");
+        if (storedProfile) {
+          try {
+            foundProfile = JSON.parse(storedProfile);
+          } catch {}
+        }
+      }
+
+      if (foundProfile) {
+        setProfile((prev) => ({
+          ...prev,
+          ...foundProfile,
+          email: activeUser || foundProfile.email || "aspirant@prayas.app",
+        }));
+      } else if (activeUser) {
+        const namePart = activeUser.includes("@")
+          ? activeUser.split("@")[0].replace(/[._-]/g, " ")
+          : activeUser;
+        const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        setProfile((prev) => ({
+          ...prev,
+          full_name: capitalized,
+          email: activeUser,
+        }));
       }
     }
   }, []);
@@ -63,7 +87,12 @@ export default function SettingsPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (typeof window !== "undefined") {
+      const activeUser = localStorage.getItem("jee_active_user") || profile.email;
       localStorage.setItem("jee_user_profile", JSON.stringify(profile));
+      if (activeUser) {
+        localStorage.setItem(`jee_profile_${activeUser}`, JSON.stringify(profile));
+      }
+      window.dispatchEvent(new Event("jee_profile_updated"));
     }
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);

@@ -17,36 +17,63 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 export default function DashboardPage() {
-  const [profile, setProfile] = React.useState({
-    full_name: "Tarang",
+  const [profile, setProfile] = React.useState<{ full_name: string }>({
+    full_name: "",
   });
   const [recentTests, setRecentTests] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const activeUser = localStorage.getItem("jee_active_user") || "";
-      const storedProfile = activeUser
-        ? localStorage.getItem(`jee_profile_${activeUser}`) || localStorage.getItem("jee_user_profile")
-        : localStorage.getItem("jee_user_profile");
+    const loadProfile = () => {
+      if (typeof window !== "undefined") {
+        const activeUser = localStorage.getItem("jee_active_user") || "";
+        let foundProfile: any = null;
 
-      if (storedProfile) {
-        try {
-          const parsed = JSON.parse(storedProfile);
-          if (parsed.full_name) {
-            setProfile(parsed);
+        if (activeUser) {
+          const scopedProfileStr = localStorage.getItem(`jee_profile_${activeUser}`);
+          if (scopedProfileStr) {
+            try {
+              foundProfile = JSON.parse(scopedProfileStr);
+            } catch {}
           }
-        } catch {}
-      }
+        }
 
-      // Load attempts
-      const userAttemptsStr = activeUser ? localStorage.getItem(`jee_attempts_${activeUser}`) : localStorage.getItem("jee_test_attempts");
-      if (userAttemptsStr) {
-        try {
-          const parsed = JSON.parse(userAttemptsStr);
-          if (Array.isArray(parsed)) setRecentTests(parsed);
-        } catch {}
+        if (!foundProfile) {
+          const storedProfile = localStorage.getItem("jee_user_profile");
+          if (storedProfile) {
+            try {
+              foundProfile = JSON.parse(storedProfile);
+            } catch {}
+          }
+        }
+
+        if (foundProfile && foundProfile.full_name) {
+          setProfile(foundProfile);
+        } else if (activeUser) {
+          const namePart = activeUser.includes("@")
+            ? activeUser.split("@")[0].replace(/[._-]/g, " ")
+            : activeUser;
+          const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+          setProfile({ full_name: capitalized });
+        } else {
+          setProfile({ full_name: "Aspirant" });
+        }
+
+        // Load attempts for this active user
+        const userAttemptsStr = activeUser
+          ? localStorage.getItem(`jee_attempts_${activeUser}`)
+          : localStorage.getItem("jee_test_attempts");
+        if (userAttemptsStr) {
+          try {
+            const parsed = JSON.parse(userAttemptsStr);
+            if (Array.isArray(parsed)) setRecentTests(parsed);
+          } catch {}
+        }
       }
-    }
+    };
+
+    loadProfile();
+    window.addEventListener("jee_profile_updated", loadProfile);
+    return () => window.removeEventListener("jee_profile_updated", loadProfile);
   }, []);
 
   const totalTests = recentTests.length;

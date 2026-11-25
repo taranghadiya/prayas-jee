@@ -79,14 +79,14 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = () => {
-    const demoEmail = "aditya.jee@example.com";
+    const demoEmail = "tarang@prayas.app";
     setEmail(demoEmail);
     setPassword("aspirant2025");
     if (typeof window !== "undefined") {
       localStorage.setItem("jee_active_user", demoEmail);
       const demoProfile = {
         id: "usr-demo",
-        full_name: "Aditya Sharma",
+        full_name: "Tarang",
         email: demoEmail,
         target_year: 2025,
         dream_college: "IIT Bombay (Computer Science)",
@@ -101,6 +101,7 @@ export default function LoginPage() {
       };
       localStorage.setItem("jee_user_profile", JSON.stringify(demoProfile));
       localStorage.setItem(`jee_profile_${demoEmail}`, JSON.stringify(demoProfile));
+      window.dispatchEvent(new Event("jee_profile_updated"));
     }
     router.push("/dashboard");
   };

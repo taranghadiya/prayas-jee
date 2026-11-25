@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Bell, Menu } from "lucide-react";
@@ -8,6 +9,53 @@ import { Input } from "@/components/ui/input";
 export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   const pathname = usePathname();
   const isExamLive = pathname.includes("/live");
+
+  const [userName, setUserName] = React.useState<string>("Tarang");
+  const [initial, setInitial] = React.useState<string>("T");
+  const [showPhoto, setShowPhoto] = React.useState<boolean>(true);
+
+  React.useEffect(() => {
+    const syncUser = () => {
+      if (typeof window !== "undefined") {
+        const activeUser = localStorage.getItem("jee_active_user") || "";
+        let profile: any = null;
+
+        if (activeUser) {
+          const scopedStr = localStorage.getItem(`jee_profile_${activeUser}`);
+          if (scopedStr) {
+            try {
+              profile = JSON.parse(scopedStr);
+            } catch {}
+          }
+        }
+
+        if (!profile) {
+          const globalStr = localStorage.getItem("jee_user_profile");
+          if (globalStr) {
+            try {
+              profile = JSON.parse(globalStr);
+            } catch {}
+          }
+        }
+
+        const name = profile?.full_name || (activeUser ? activeUser.split("@")[0] : "Tarang");
+        const formatted = name.charAt(0).toUpperCase() + name.slice(1);
+        setUserName(formatted);
+        setInitial(formatted.charAt(0).toUpperCase());
+
+        // Only show hero photo if user is Tarang or default, otherwise show clean letter avatar
+        const isTarang =
+          !activeUser ||
+          activeUser.toLowerCase().includes("tarang") ||
+          name.toLowerCase().includes("tarang");
+        setShowPhoto(isTarang);
+      }
+    };
+
+    syncUser();
+    window.addEventListener("jee_profile_updated", syncUser);
+    return () => window.removeEventListener("jee_profile_updated", syncUser);
+  }, []);
 
   if (isExamLive) {
     return null; // Exam has dedicated CBT header
@@ -56,16 +104,18 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
             <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-purple-500 shadow-sm shadow-purple-500/80" />
           </button>
 
-          <Link href="/profile" className="flex items-center gap-2 group">
+          <Link href="/profile" className="flex items-center gap-2 group" title={`Profile: ${userName}`}>
             <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-purple-700 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-purple-900/40 group-hover:scale-105 transition-transform overflow-hidden border border-purple-500/30">
-              <img
-                src="/images/hero-artwork.jpg"
-                alt="Profile"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = "none";
-                }}
-              />
+              {showPhoto ? (
+                <img
+                  src="/images/hero-artwork.jpg"
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                  onError={() => setShowPhoto(false)}
+                />
+              ) : (
+                <span>{initial}</span>
+              )}
             </div>
           </Link>
         </div>

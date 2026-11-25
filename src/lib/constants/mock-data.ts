@@ -2,8 +2,8 @@ import { MockTest, Question, Profile } from "../types/database";
 
 export const SAMPLE_USER_PROFILE: Profile = {
   id: "usr-jee-2025-01",
-  full_name: "Aditya Sharma",
-  email: "aditya.jee@example.com",
+  full_name: "Tarang",
+  email: "tarang@prayas.app",
   target_year: 2025,
   dream_college: "IIT Bombay (Computer Science)",
   preferred_language: "English",
